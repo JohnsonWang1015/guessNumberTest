@@ -73,8 +73,8 @@ public class MainClass {
 		max = 100;
 		
 		do {
+			guess = (int)(Math.random() * (max - min + 1) + min); // 電腦用亂數猜
 			System.out.printf("請猜 %2d ~ %3d : ", min, max);
-			guess = new Random().nextInt(max) + 1; // 電腦用亂數猜
 			
 			System.out.printf("[%d]%n", guess); // 列印猜的數字
 			
