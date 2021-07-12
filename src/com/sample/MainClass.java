@@ -17,8 +17,6 @@ public class MainClass {
 	static Instant t1 = null; 	// 時間戳 t1
 	static Instant t2 = null; 	// 時間戳 t2
 	static Duration duration = null; 
-	static int counter = 0; 	// 儲存時間個數
-	static long average = 0;	// 時間平均
 	
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
@@ -26,7 +24,7 @@ public class MainClass {
 		int keyin = 0; 			// 輸入選項
 		
 		do {
-			int random = new Random().nextInt(max) + 1; // 答案
+			int random = 0; // 答案
 			
 			System.out.print("1)電腦正常猜 2)電腦二分搜尋猜 3)兩者時間分析 4)離開:");
 			keyin = scanner.nextInt(); 		// 輸入
@@ -37,21 +35,37 @@ public class MainClass {
 			}else {
 				switch(keyin) {
 					case 1:
+						random = new Random().nextInt(100) + 1;
+						
 						t1 = Instant.now();
 						computerGuessNumber(random);
 						t2 = Instant.now();
 						duration = Duration.between(t1, t2); 		// 計算時間差
 						System.out.println("時間差:" + duration.toNanos() + " 奈秒");
 						time_computer.add(duration.toNanos()); 		// 列印轉成奈秒的時間差
+						
+						for(int i=0; i<time_computer.size(); i++) {
+							if(time_computer.get(i) == 0)
+								time_computer.remove(i);
+						}
+						
 						System.out.println("----------------");
 						break;
 					case 2:
+						random = new Random().nextInt(100) + 1;
+						
 						t1 = Instant.now();
 						binaryGuessNumber(random);
 						t2 = Instant.now();
 						duration = Duration.between(t1, t2); 		// 計算時間差
 						System.out.println("時間差:" + duration.toNanos() + " 奈秒");
 						time_binary.add(duration.toNanos());		// 列印轉成奈秒的時間差
+						
+						for(int i=0; i<time_binary.size(); i++) {
+							if(time_binary.get(i) == 0)
+								time_binary.remove(i);
+						}
+						
 						System.out.println("----------------");
 						break;
 					case 3:
@@ -67,9 +81,8 @@ public class MainClass {
 	
 	// 電腦正常猜數字
 	private static void computerGuessNumber(int random) {	
-		// 重設
 		guess = 0;
-		min = 0;
+		min = 1;
 		max = 100;
 		
 		do {
@@ -99,52 +112,77 @@ public class MainClass {
 	
 	// 電腦二分搜尋法猜數字
 	private static void binaryGuessNumber(int random) {
-		// 重設
 		guess = 0;
-		min = 0;
+		min = 1;
 		max = 100;
 		
-		do {
-			// 二分搜尋法
-			guess= (max + min) / 2;
+		if(random == 1 || random == 100) {
 			System.out.printf("請猜 %2d ~ %3d : ", min, max);
-			System.out.printf("[%d]%n", guess);
-			
-			if(guess == random) {
-				System.out.printf("猜中了! 答案是:%d%n", guess);
-			}else if(guess > random){
-				max = guess - 1;
+			if(random == 1) {
+				guess = 1;
 			}else {
-				min = guess + 1;
+				guess = 100;
 			}
-		}while(guess != random);
+			System.out.printf("[%d]%n", guess);
+			System.out.printf("猜中了! 答案是:%d%n", guess);
+		}else {
+			do {
+				// 二分搜尋法
+				guess= (max + min) / 2;
+				System.out.printf("請猜 %2d ~ %3d : ", min, max);
+				System.out.printf("[%d]%n", guess);
+			
+				if(guess == random) {
+					System.out.printf("猜中了! 答案是:%d%n", guess);
+				}else if(guess > random){
+					max = guess - 1;
+				}else {
+					min = guess + 1;
+				}
+			}while(guess != random);
+		}
 	}
 	
 	private static void timeAnalysis() {
-		// 顯示時間
-		System.out.print("電腦正常猜時間：");
-		for(int i=0;i<time_computer.size(); i++) {
-			System.out.printf("%d ", time_computer.get(i));
-		}
+		int counter = 0; 	// 儲存時間個數
+		long pc_avg = 0, bin_avg = 0, temp = 0;
 		
-		System.out.print("\n電腦二分搜尋猜時間：");
-		for(int i=0;i<time_binary.size(); i++) {
-			System.out.printf("%d ", time_binary.get(i));
-		}
+		// 顯示時間
+		System.out.println("電腦正常猜時間：" + time_computer);
+		System.out.println("電腦二分搜尋猜時間：" + time_binary);
 		
 		// 分析時間，選時間總個數(counter)最小計算
-		if(time_computer.size() > time_binary.size()) {
+		if(!(time_computer.isEmpty() && time_binary.isEmpty())) {
+			
+			counter = 0;
 			counter = time_binary.size();
 			for(int i=0; i<counter; i++) {
-				average = time_binary.get(i) / counter;
+				temp += time_binary.get(i);
 			}
-			System.out.printf("\n\n二分法搜尋較快，平均：%d%n", average);
-		}else {
+			bin_avg = temp / counter;
+			
+			counter = 0;
 			counter = time_computer.size();
 			for(int i=0; i<counter; i++) {
-				average = time_computer.get(i) / counter;
+				temp += time_computer.get(i);
 			}
-			System.out.printf("\n\n正常搜尋較快，平均：%d%n", average);
+			pc_avg = temp / counter;
+			
+		}
+		
+		// 檢查是否有空集合
+		if(time_computer.isEmpty()){
+			System.out.printf("\n二分法搜尋，平均：%d%n", bin_avg);
+		}
+		if(time_binary.isEmpty()){
+			System.out.printf("\n電腦搜尋，平均：%d%n", pc_avg);
+		}
+		
+		// 判斷快慢
+		if(pc_avg > bin_avg) {
+			System.out.printf("\n二分法搜尋較快，平均：%d%n", bin_avg);
+		}else {
+			System.out.printf("\n正常搜尋較快，平均：%d%n", pc_avg);
 		}
 	}
 }
