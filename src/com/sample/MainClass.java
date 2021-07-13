@@ -95,7 +95,7 @@ public class MainClass {
 				if(guess == random) {
 					System.out.printf("猜中了! 答案是:%d%n", guess);
 				}else {
-					if(guess >= random) {
+					if(guess > random) {
 						max = guess;
 					}else {
 						min = guess;
@@ -128,7 +128,7 @@ public class MainClass {
 		}else {
 			do {
 				// 二分搜尋法
-				guess= (max + min) / 2;
+				guess= Math.round((max + min) / 2);
 				System.out.printf("請猜 %2d ~ %3d : ", min, max);
 				System.out.printf("[%d]%n", guess);
 			
